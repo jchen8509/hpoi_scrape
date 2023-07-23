@@ -1,10 +1,22 @@
 import requests
 from bs4 import BeautifulSoup
 
+# TODO: Make Card class
+# class Card:
+#     public img_src: string
+#     public title: string
+#     public description: string
+#     public link: string
+
 URL = "https://www.hpoi.net"
 page = requests.get(URL)
 
 soup = BeautifulSoup(page.content, "html.parser")
 
-results = soup.findAll("div", class_="hpoi-conter-ltsifrato")
-print(results)
+cards_html = soup.find("div", class_="hpoi-conter-ltsifrato").find_all("div", class_="hpoi-conter-left")
+
+for result in cards_html:
+    # TODO: Grab data, create new instance of card class
+    image = result.find("div", class_="left-leioan").find("img")
+    print(image)
+
