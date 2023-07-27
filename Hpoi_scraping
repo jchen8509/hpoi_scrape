@@ -1,22 +1,41 @@
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, ResultSet, Tag
+from dataclasses import dataclass
+
+
+
 
 # TODO: Make Card class
-# class Card:
-#     public img_src: string
-#     public title: string
-#     public description: string
-#     public link: string
+@dataclass
+class hpoiCard:
+     img_src: str
+     title: str
+     description: str
+     link: str
+
+
+def tag_to_card(tag: Tag) -> hpoiCard:
+    image:Tag = tag.find("div", class_="left-leioan").find("a")
+    link:str = image.get("href")
+    image_src:str = image.find("img").get("src")
+
+    info:Tag = tag.find("div", class_="right-leioan")
+    title:str = info.find("div").find("span").text
+    description:str = info.find_all("div")[3].text
+
+    return hpoiCard(image_src,title,description,link)
+
 
 URL = "https://www.hpoi.net"
 page = requests.get(URL)
 
+
 soup = BeautifulSoup(page.content, "html.parser")
 
-cards_html = soup.find("div", class_="hpoi-conter-ltsifrato").find_all("div", class_="hpoi-conter-left")
+card_tags:ResultSet[Tag] = soup.find("div", class_="hpoi-conter-ltsifrato").find_all("div", class_="hpoi-conter-left")
 
-for result in cards_html:
-    # TODO: Grab data, create new instance of card class
-    image = result.find("div", class_="left-leioan").find("img")
-    print(image)
+cards: list[hpoiCard] = map(tag_to_card,card_tags)
 
+for card in cards:
+     print(card)
+     print("\n")
