@@ -1,6 +1,5 @@
 import requests
-import time
-from bs4 import BeautifulSoup, ResultSet, Tag
+from bs4 import BeautifulSoup, Tag
 from dataclasses import dataclass
 
 URL = "https://www.hpoi.net"
@@ -59,7 +58,7 @@ def tag_to_card(tag: Tag) -> hpoiCard:
     link:str = URL + "/" + image.get("href")
     img_src:str = image.find("img").get("src")
 
-    # --INNER PAGE--
+    # --INNER PAGE--m
     page = requests.get(link)
     inner_soup = BeautifulSoup(page.content, "html.parser")
 
@@ -87,28 +86,24 @@ def getItem(tag: Tag, infoList_name: str):
     except AttributeError:
         print(infoList_name + ' not found')
         return "N/A"
+cards = []
+def fetch():    
+    print('Loading page...')
+    page = requests.get(URL)
+    print('Page loaded!')
+    soup = BeautifulSoup(page.content, "html.parser")
+    top_card_tag: Tag = soup.find("div", class_="hpoi-conter-ltsifrato").find("div", class_="hpoi-conter-left")
+    cardTitle:str = top_card_tag.find("div", class_="right-leioan").find_all("div")[4].text
     
-def main():
-    cards:list[hpoiCard] = []
-    starttime = time.monotonic()
+    if(len(cards) > 0 and cardTitle == cards[-1].title):
+        print("Card is old!")
+        return
 
-    while True:
-        time.sleep(wait_time_seconds - ((time.monotonic() - starttime) % wait_time_seconds))
-        print('Loading page...')
-        page = requests.get(URL)
-        print('Page loaded!')
-        soup = BeautifulSoup(page.content, "html.parser")
-        top_card_tag: Tag = soup.find("div", class_="hpoi-conter-ltsifrato").find("div", class_="hpoi-conter-left")
-        cardTitle:str = top_card_tag.find("div", class_="right-leioan").find_all("div")[4].text
-        if(len(cards) > 0 and cardTitle == cards[-1].title):
-            print("Top card is old!")
-            continue
-        print("Top card is new!")
-
-        # code to grab card data
-        top_card = tag_to_card(top_card_tag)
-        cards.append(top_card)
-        print("Card inserted!")
+    # code to grab card data
+    top_card = tag_to_card(top_card_tag)
+    cards.append(top_card)
+    print("Card inserted!")
+    return(top_card)
 
 if __name__ == "__main__":
-    main()
+    fetch()
