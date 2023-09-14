@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, Tag, ResultSet
 from dataclasses import dataclass
 
 URL = "https://www.hpoi.net"
@@ -17,6 +17,8 @@ translations = {
     "Scale": '比例',
     "Dimension": '尺寸'
 }
+# number of cards to poll at once
+batch_size = 5
 
 # TODO: add consts for selectors
 @dataclass
@@ -86,24 +88,35 @@ def getItem(tag: Tag, infoList_name: str):
     except AttributeError:
         print(infoList_name + ' not found')
         return "N/A"
-cards = []
-def fetch():    
+    
+titleCache: list[str] = []
+
+def fetchCards() -> list[hpoiCard]:    
     print('Loading page...')
     page = requests.get(URL)
     print('Page loaded!')
     soup = BeautifulSoup(page.content, "html.parser")
-    top_card_tag: Tag = soup.find("div", class_="hpoi-conter-ltsifrato").find("div", class_="hpoi-conter-left")
-    cardTitle:str = top_card_tag.find("div", class_="right-leioan").find_all("div")[4].text
-    
-    if(len(cards) > 0 and cardTitle == cards[-1].title):
-        print("Card is old!")
-        return
 
-    # code to grab card data
-    top_card = tag_to_card(top_card_tag)
-    cards.append(top_card)
-    print("Card inserted!")
-    return(top_card)
+    tags: ResultSet[Tag] = soup.find("div", class_="hpoi-conter-ltsifrato").find_all("div", class_="hpoi-conter-left")
+
+    tags = tags[:batch_size]
+
+    titles = map(lambda tag: tag.find("div", class_="right-leioan").find_all("div")[4].text, tags)
+    tags_and_titles = zip(tags,titles)
+    tags_and_titles = list(filter(lambda pair: pair[1] not in titleCache, tags_and_titles))
+
+    if(len(tags_and_titles) <= 0):
+        print("Found no new cards!")
+        return []
+    print("Found "+str(len(tags_and_titles))+ " new cards!")
+
+    cards: list[hpoiCard] = []
+    for tag, title in tags_and_titles:
+        # code to grab card data
+        cards.append(tag_to_card(tag))
+        titleCache.append(title)
+        
+    return cards
 
 if __name__ == "__main__":
-    fetch()
+    fetchCards()
