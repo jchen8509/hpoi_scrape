@@ -65,7 +65,8 @@ class YOUR_OWN_G_DANG_COLOR_MAP(Enum):
 
 STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
     STATUS.NEW_ANNOUNCEMENT: YOUR_OWN_G_DANG_COLOR_MAP.purple,
-    STATUS.UPDATE: YOUR_OWN_G_DANG_COLOR_MAP.blue,
+    STATUS.IMG_UPDATE: YOUR_OWN_G_DANG_COLOR_MAP.blue,
+    STATUS.INFO_UPDATE: YOUR_OWN_G_DANG_COLOR_MAP.blue,
     STATUS.PO_OPENED: YOUR_OWN_G_DANG_COLOR_MAP.green,
     STATUS.RELEASE_DATE: YOUR_OWN_G_DANG_COLOR_MAP.gold,
     STATUS.DELAYED: YOUR_OWN_G_DANG_COLOR_MAP.red,
@@ -74,6 +75,7 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 
 def card_to_embed(card: hpoiCard):
    embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
+   print(card.status)
    embed.add_field(name = card.name, value = '',inline = False)
    embed.add_field(name = "Origin", value = re.sub(r"[\n\t\s]*", "", card.origin), inline = True)
    embed.add_field(name = "Character", value = re.sub(r"[\n\t\s]*", "", card.character), inline = True)

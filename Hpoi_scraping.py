@@ -12,11 +12,12 @@ wait_time_seconds: float = 60 * 5
 
 class STATUS(Enum):
     NEW_ANNOUNCEMENT = "New Announcement"
-    UPDATE = "Update"
+    IMG_UPDATE = "Image Update"
     PO_OPENED = "Pre-Orders Opened"
     RELEASE_DATE = "Release Date"
     DELAYED = "Delayed"
     RE_RELEASE = "Re-Release"
+    INFO_UPDATE = "Info Update"
 
 
 # Chinese translations
@@ -33,7 +34,8 @@ TRANSLATIONS = {
     "Dimension": "尺寸",
     # --OUTER PAGE--
     "制作决定": STATUS.NEW_ANNOUNCEMENT,
-    "官图更新": STATUS.UPDATE,
+    "官图更新": STATUS.IMG_UPDATE,
+    "情报更新": STATUS.INFO_UPDATE,
     "预定时间": STATUS.PO_OPENED,
     "出荷时间": STATUS.RELEASE_DATE,
     "出荷延期": STATUS.DELAYED,
@@ -174,7 +176,7 @@ async def fetchCards() -> list[hpoiCard]:
             if(len(titleCache) > BATCH_SIZE):
                 titleCache.pop(0)
         # TODO: call gather here
-        return await asyncio.gather(*cardTasks)
+        cards = await asyncio.gather(*cardTasks)
 
 if __name__ == "__main__":
      # Start the asyncio program
