@@ -19,6 +19,7 @@ bot = discord.Client(intents=intents)
 # python3 example_bot.py to run bot
 @bot.event
 async def on_ready():
+    channel = bot.get_channel(channel_id)
     print(f'We have logged in as {bot.user}')
 
 @bot.event
@@ -31,11 +32,11 @@ async def on_message(message):
 
     # Start/Stop fetching updates
     if ("hpoi trace on" == message.content.lower() or "hpoi trace on" in message.content.lower()):
-        channel = bot.get_channel(channel_id)
+        # channel = bot.get_channel(channel_id)
         # await channel.send('Start spying on Hpoi <:miku_omega:1146239251596460072>')
         pollSite.start()
     if ("hpoi eepy" == message.content.lower() or "hpoi eepy" in message.content.lower()):
-        channel = bot.get_channel(channel_id)
+        # channel = bot.get_channel(channel_id)
         # await channel.send('No longer spying on Hpoi <:cat_cry:1146240394724655235>')
         pollSite.stop()
 
@@ -43,7 +44,8 @@ async def on_message(message):
 async def pollSite():
     try:
         channel = bot.get_channel(channel_id)
-        cards = fetchCards()
+        # TODO: Make async and await instead
+        cards = await fetchCards()
         embeds = map(card_to_embed,cards)
     except Exception as e: 
         # await channel.send('Found new update but I cannot get them <:cat_cry:1146240394724655235>')
