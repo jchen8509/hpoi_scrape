@@ -13,12 +13,11 @@ wait_time_seconds: float = 60 * 5
 class STATUS(Enum):
     NEW_ANNOUNCEMENT = "New Announcement"
     IMG_UPDATE = "Image Update"
+    INFO_UPDATE = "Info Update"
     PO_OPENED = "Pre-Orders Opened"
     RELEASE_DATE = "Release Date"
     DELAYED = "Delayed"
     RE_RELEASE = "Re-Release"
-    INFO_UPDATE = "Info Update"
-
 
 # Chinese translations
 TRANSLATIONS = {
@@ -27,7 +26,7 @@ TRANSLATIONS = {
     "Character": "角色",
     "Manufacturer": "制作",
     "Illustrator": "原画",
-    "Release Date": "发售日",
+    "Release Date": ["发售", "发售日"],
     "Price": "定价",
     "Material": "材质",
     "Scale": "比例",
@@ -35,14 +34,14 @@ TRANSLATIONS = {
     # --OUTER PAGE--
     "制作决定": STATUS.NEW_ANNOUNCEMENT,
     "官图更新": STATUS.IMG_UPDATE,
-    "情报更新": STATUS.INFO_UPDATE,
+    "": STATUS.INFO_UPDATE,
     "预定时间": STATUS.PO_OPENED,
     "出荷时间": STATUS.RELEASE_DATE,
     "出荷延期": STATUS.DELAYED,
     "再版确定": STATUS.RE_RELEASE,
 }
 # number of cards to poll at once
-BATCH_SIZE = 15
+BATCH_SIZE = 20
 
 
 # TODO: add consts for selectors
@@ -79,6 +78,7 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
 
         title: str = info.find_all("div")[4].text
         status: STATUS = TRANSLATIONS.get(info.find("div").find("span").text)
+        # print(status)
         link: str = URL + "/" + image.get("href")
         img_src: str = image.find("img").get("src")
 
@@ -123,7 +123,7 @@ def getItem(tag: Tag, infoList_name: str):
     try:
         return tag.find("span", string=infoList_name).findNext("p").text
     except AttributeError:
-        print(infoList_name + " not found")
+        # print(infoList_name + " not found")
         return "N/A"
 
 
@@ -155,11 +155,18 @@ async def fetchCards() -> list[hpoiCard]:
         titles = map(
             lambda tag: tag.find("div", class_="right-leioan").find_all("div")[4].text, tags
         )
-        tags_and_titles = zip(tags, titles)
+        tags_and_titles = list(zip(tags, titles))
+        for tag, title in tags_and_titles:
+            print(title)
         tags_and_titles = list(
             filter(lambda pair: pair[1] not in titleCache, tags_and_titles)
         )
+        print("cache:")
 
+        print(titleCache)
+        print("filtered titles: ")
+        for tag, title in tags_and_titles:
+            print(title)
         if len(tags_and_titles) <= 0:
             print("Found no new cards!")
             return []
@@ -177,7 +184,9 @@ async def fetchCards() -> list[hpoiCard]:
                 titleCache.pop(0)
         # TODO: call gather here
         cards = await asyncio.gather(*cardTasks)
+    return cards
 
 if __name__ == "__main__":
      # Start the asyncio program
      asyncio.run(fetchCards())
+

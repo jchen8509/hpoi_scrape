@@ -74,14 +74,14 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 }
 
 def card_to_embed(card: hpoiCard):
-   embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
    print(card.status)
+   embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
    embed.add_field(name = card.name, value = '',inline = False)
    embed.add_field(name = "Origin", value = re.sub(r"[\n\t\s]*", "", card.origin), inline = True)
    embed.add_field(name = "Character", value = re.sub(r"[\n\t\s]*", "", card.character), inline = True)
    embed.add_field(name = "Manufacturer", value = card.manufacturer, inline = True)
    embed.add_field(name = "Illustrator", value = re.sub(r"[\n\t\s]*", "", card.illustrator), inline = True)
-   embed.add_field(name = "Release Date", value = re.sub(r"[\n\t\s]*", "", card.release_date), inline = True)
+   embed.add_field(name = "Release Date", value = card.release_date, inline = True)
    embed.add_field(name = "Price", value = card.price, inline = True)
    embed.add_field(name = "Material", value = re.sub(r"[\n\t\s]*", "", card.material), inline = True)
    embed.add_field(name = "Scale", value = card.scale, inline = True)
