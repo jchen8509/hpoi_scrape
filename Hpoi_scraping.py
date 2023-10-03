@@ -91,9 +91,9 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
         name = getItem(inner_info, TRANSLATIONS.get("Name"))
         # what does it take in = type
         # what variable it takes in = variable name
-        translated_name = (translate_text(name))["translatedText"]
+        translated_name = translate_text(name)
         origin = getItem(inner_info, TRANSLATIONS.get("Origin"))
-        translated_origin = (translate_text(origin))["translatedText"]
+        translated_origin = translate_text(origin)
         character = getItem(inner_info, TRANSLATIONS.get("Character"))
         manufacturer = getItem(inner_info, TRANSLATIONS.get("Manufacturer"))
         illustrator = getItem(inner_info, TRANSLATIONS.get("Illustrator"))

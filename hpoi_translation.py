@@ -1,4 +1,4 @@
-def translate_text(text: str) -> dict:
+def translate_text(text: str) -> str:
     # -> = annotate``
     """Translates text into the target language.
 
@@ -16,9 +16,5 @@ def translate_text(text: str) -> dict:
     # will return a sequence of results for each text.
 
     result = translate_client.translate(text, target_language="en")
-
-    print("Text: {}".format(result["input"]))
-    print("Translation: {}".format( result["translatedText"]) )
-    print("Detected source language: {}".format(result["detectedSourceLanguage"]))
-
+    
     return result["translatedText"]
