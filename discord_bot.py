@@ -4,7 +4,7 @@ import re
 from discord.ext import tasks
 from dotenv import load_dotenv
 from enum import Enum
-from Hpoi_scraping import fetchCards, hpoiCard, STATUS
+from hpoi_scraping import fetchCards, hpoiCard, STATUS
 
 load_dotenv()
 token = os.getenv("TOKEN")
@@ -48,7 +48,6 @@ async def pollSite():
         cards = await fetchCards()
         embeds = map(card_to_embed,cards)
     except Exception as e: 
-        # await channel.send('Found new update but I cannot get them <:cat_cry:1146240394724655235>')
         print(e)
     else:
         for embed in embeds:
@@ -74,7 +73,6 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 }
 
 def card_to_embed(card: hpoiCard):
-   print(card.status)
    embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
    embed.add_field(name = card.name, value = '',inline = False)
    embed.add_field(name = "Origin", value = re.sub(r"[\n\t\s]*", "", card.origin), inline = True)

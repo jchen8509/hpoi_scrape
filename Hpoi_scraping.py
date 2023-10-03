@@ -1,13 +1,13 @@
 from enum import Enum
 from bs4 import BeautifulSoup, Tag, ResultSet
 from dataclasses import dataclass
+from hpoi_translation import translate_text
 import aiohttp
 import asyncio
 
-# from google.cloud import translate_v2 as translate
-
 URL = "https://www.hpoi.net"
 wait_time_seconds: float = 60 * 5
+BATCH_SIZE = 1
 
 
 class STATUS(Enum):
@@ -41,7 +41,6 @@ TRANSLATIONS = {
     "再版确定": STATUS.RE_RELEASE,
 }
 # number of cards to poll at once
-BATCH_SIZE = 20
 
 
 # TODO: add consts for selectors
@@ -90,7 +89,11 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
         inner_info: Tag = inner_soup.find("div", class_="infoList-box")
 
         name = getItem(inner_info, TRANSLATIONS.get("Name"))
+        # what does it take in = type
+        # what variable it takes in = variable name
+        translated_name = (translate_text(name))["translatedText"]
         origin = getItem(inner_info, TRANSLATIONS.get("Origin"))
+        translated_origin = (translate_text(origin))["translatedText"]
         character = getItem(inner_info, TRANSLATIONS.get("Character"))
         manufacturer = getItem(inner_info, TRANSLATIONS.get("Manufacturer"))
         illustrator = getItem(inner_info, TRANSLATIONS.get("Illustrator"))
@@ -100,13 +103,14 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
         scale = getItem(inner_info, TRANSLATIONS.get("Scale"))
         dimension = getItem(inner_info, TRANSLATIONS.get("Dimension"))
 
+
         return hpoiCard(
             title,
             status,
             link,
             img_src,
-            name,
-            origin,
+            translated_name,
+            translated_origin,
             character,
             manufacturer,
             illustrator,
@@ -135,11 +139,6 @@ async def fetchCards() -> list[hpoiCard]:
     async with aiohttp.ClientSession() as session:
         res = await session.get(URL)
 
-        # note: how to gather
-        # res1 = session.get(URL1)
-        # res2 = session.get(URL2)
-        # responses = await asyncio.gather(res1,res2)
-
         text = await res.read()
 
         if res.status != 200:
@@ -156,17 +155,10 @@ async def fetchCards() -> list[hpoiCard]:
             lambda tag: tag.find("div", class_="right-leioan").find_all("div")[4].text, tags
         )
         tags_and_titles = list(zip(tags, titles))
-        for tag, title in tags_and_titles:
-            print(title)
+
         tags_and_titles = list(
             filter(lambda pair: pair[1] not in titleCache, tags_and_titles)
         )
-        print("cache:")
-
-        print(titleCache)
-        print("filtered titles: ")
-        for tag, title in tags_and_titles:
-            print(title)
         if len(tags_and_titles) <= 0:
             print("Found no new cards!")
             return []
@@ -176,17 +168,18 @@ async def fetchCards() -> list[hpoiCard]:
         cardTasks = []
         for tag, title in tags_and_titles:
             # Code to grab card data; make async tag_to_card
-            cardTasks.append(tag_to_card(tag, session))
+            cardTasks.insert(0,tag_to_card(tag, session))
             
-            titleCache.append(title)
+            titleCache.insert(0,title)
             # Remove stale entries from cache
             if(len(titleCache) > BATCH_SIZE):
-                titleCache.pop(0)
+                titleCache.pop(-1)
         # TODO: call gather here
         cards = await asyncio.gather(*cardTasks)
     return cards
 
 if __name__ == "__main__":
      # Start the asyncio program
-     asyncio.run(fetchCards())
+     # programming languages list
+    asyncio.run(fetchCards())
 

@@ -3,3 +3,4 @@ bot-env
 __pycache__
 .venv
 .DS_STORE
+.google-cloud-sdk
