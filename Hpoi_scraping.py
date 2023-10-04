@@ -1,7 +1,7 @@
 from enum import Enum
 from bs4 import BeautifulSoup, Tag, ResultSet
 from dataclasses import dataclass
-from hpoi_translation import translate_text
+from hpoi_translation import FormatResponse
 import aiohttp
 import asyncio
 
@@ -91,17 +91,25 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
         name = getItem(inner_info, TRANSLATIONS.get("Name"))
         # what does it take in = type
         # what variable it takes in = variable name
-        translated_name = translate_text(name)
+        translated_name = (name)
         origin = getItem(inner_info, TRANSLATIONS.get("Origin"))
-        translated_origin = translate_text(origin)
+        #translated_origin = translate_text(origin)
         character = getItem(inner_info, TRANSLATIONS.get("Character"))
+        #translated_character = translate_text(character)
         manufacturer = getItem(inner_info, TRANSLATIONS.get("Manufacturer"))
+        #translated_manufacturer = translate_text(manufacturer)
         illustrator = getItem(inner_info, TRANSLATIONS.get("Illustrator"))
+        #translated_illustrator = translate_text(illustrator)
         release_date = getItem(inner_info, TRANSLATIONS.get("Release Date"))
+        #translated_release_date = translate_text(release_date)
         price = getItem(inner_info, TRANSLATIONS.get("Price"))
+        #translated_price = translate_text(price)
         material = getItem(inner_info, TRANSLATIONS.get("Material"))
-        scale = getItem(inner_info, TRANSLATIONS.get("Scale"))
+        #translated_material = translate_text(material)
+        Scale = getItem(inner_info, TRANSLATIONS.get("Scale"))
+        #translated_scale = translate_text(scale)
         dimension = getItem(inner_info, TRANSLATIONS.get("Dimension"))
+        #translated_dimension = translate_text(dimension)
 
 
         return hpoiCard(
@@ -110,15 +118,15 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
             link,
             img_src,
             translated_name,
-            translated_origin,
-            character,
-            manufacturer,
-            illustrator,
-            release_date,
-            price,
-            material,
-            scale,
-            dimension,
+            #translated_origin,
+            #translated_character,
+            #translated_manufacturer,
+            #translated_illustrator,
+            #translated_release_date,
+            #translated_price,
+            #translated_material,
+            #translated_scale,
+            #translated_dimension,
         )
 
 
