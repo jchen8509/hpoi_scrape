@@ -1,6 +1,5 @@
 import discord
 import os
-import re
 from discord.ext import tasks
 from dotenv import load_dotenv
 from enum import Enum

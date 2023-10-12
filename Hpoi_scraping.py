@@ -4,12 +4,11 @@ from bs4 import BeautifulSoup, Tag, ResultSet
 from dataclasses import dataclass
 from enum import Enum
 from hpoi_translation import Process
-import pandas as pd
 
 
 URL = "https://www.hpoi.net"
 wait_time_seconds: float = 60 * 5
-BATCH_SIZE = 3
+BATCH_SIZE = 1
 
 
 class STATUS(Enum):
@@ -130,9 +129,6 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
                 dimension,
             ],
         )
-
-       #while ("") in translatedOrigin:
-            #translatedOrigin.remove("")
         
         return hpoiCard(
             title,
