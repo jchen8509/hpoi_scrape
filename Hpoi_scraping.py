@@ -198,8 +198,8 @@ async def fetchCards() -> list[hpoiCard]:
 
             titleCache.insert(0, title)
             # Remove stale entries from cache
-            if len(titleCache) > BATCH_SIZE:
-                titleCache.pop(-1)
+            # if len(titleCache) > BATCH_SIZE:
+                # titleCache.pop(-1)
         # TODO: call gather here
         cards = await asyncio.gather(*cardTasks)
     return cards
