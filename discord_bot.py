@@ -5,6 +5,7 @@ from discord.ext import tasks
 from dotenv import load_dotenv
 from enum import Enum
 from hpoi_scraping import fetchCards, hpoiCard, STATUS
+import html
 
 load_dotenv()
 token = os.getenv("TOKEN")
@@ -73,12 +74,12 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 }
 
 def card_to_embed(card: hpoiCard):
-   embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
-   embed.add_field(name = card.name, value = '', inline = False)
-   embed.add_field(name = "Origin", value = card.origin, inline = True)
-   embed.add_field(name = "Character", value = card.character, inline = True)
-   embed.add_field(name = "Manufacturer", value = card.manufacturer, inline = True)
-   embed.add_field(name = "Illustrator", value = re.sub(r"[\n\t\s]*", "", card.illustrator), inline = True)
+   embed = discord.Embed(title = card.status.value, url = card.link, description = html.unescape(card.name), color = STATUS_TO_COLOR.get(card.status).value)
+   # embed.add_field(name = html.unescape(card.name), value = '', inline = False)
+   embed.add_field(name = "Origin", value = "".join(html.unescape(card.origin)).split(), inline = True)
+   embed.add_field(name = "Character", value = "".join(html.unescape(card.character)).split(), inline = True)
+   embed.add_field(name = "Manufacturer", value = "".join(html.unescape(card.manufacturer).split()), inline = True)
+   embed.add_field(name = "Illustrator", value = "".join(html.unescape(card.illustrator)).split(), inline = True)
    embed.add_field(name = "Release Date", value = card.release_date, inline = True)
    embed.add_field(name = "Price", value = card.price, inline = True)
    embed.add_field(name = "Material", value = card.material, inline = True)

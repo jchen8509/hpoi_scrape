@@ -1,13 +1,15 @@
-from enum import Enum
-from bs4 import BeautifulSoup, Tag, ResultSet
-from dataclasses import dataclass
-from hpoi_translation import Process
 import aiohttp
 import asyncio
+from bs4 import BeautifulSoup, Tag, ResultSet
+from dataclasses import dataclass
+from enum import Enum
+from hpoi_translation import Process
+import pandas as pd
+
 
 URL = "https://www.hpoi.net"
 wait_time_seconds: float = 60 * 5
-BATCH_SIZE = 20
+BATCH_SIZE = 3
 
 
 class STATUS(Enum):
@@ -129,6 +131,9 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
             ],
         )
 
+       #while ("") in translatedOrigin:
+            #translatedOrigin.remove("")
+        
         return hpoiCard(
             title,
             status,
@@ -153,7 +158,7 @@ def getItem(tag: Tag, infoList_name: str):
         return tag.find("span", string=infoList_name).findNext("p").text
     except AttributeError:
         # print(infoList_name + " not found")
-        return "N/A"
+        return ""
 
 
 titleCache: list[str] = []
