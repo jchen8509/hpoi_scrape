@@ -74,13 +74,16 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 
 def card_to_embed(card: hpoiCard):
    embed = discord.Embed(title = card.status.value, url = card.link, description = html.unescape(card.name), color = STATUS_TO_COLOR.get(card.status).value)
-   embed.add_field(name = "Origin", value = "".join(html.unescape(card.origin)).split(), inline = True)
-   embed.add_field(name = "Character", value = "".join(html.unescape(card.character)).split(), inline = True)
-   embed.add_field(name = "Manufacturer", value = "".join(html.unescape(card.manufacturer).split()), inline = True)
-   embed.add_field(name = "Illustrator", value = "".join(html.unescape(card.illustrator)).split(), inline = True)
+   embed.add_field(name = "Origin", value = " ".join(html.unescape(card.origin).split()), inline = True)
+   embed.add_field(name = "Character", value = " ".join(html.unescape(card.character).split()), inline = True)
+   embed.add_field(name = "Manufacturer", value = " ".join(html.unescape(card.manufacturer).split()), inline = True)
+   #if(card.illustrator != "Non"):
+   embed.add_field(name = "Illustrator", value = " ".join(html.unescape(card.illustrator).split()), inline = True)
    embed.add_field(name = "Release Date", value = card.release_date, inline = True)
    embed.add_field(name = "Price", value = card.price, inline = True)
    embed.add_field(name = "Material", value = card.material, inline = True)
+
+   #if(card.scale != "Non"):
    embed.add_field(name = "Scale", value = card.scale, inline = True)
    embed.add_field(name = "Dimension", value = card.dimension, inline = True)
    embed.set_image(url = card.img_src)

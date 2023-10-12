@@ -8,7 +8,7 @@ from hpoi_translation import Process
 
 URL = "https://www.hpoi.net"
 wait_time_seconds: float = 60 * 5
-BATCH_SIZE = 1
+BATCH_SIZE = 2
 
 
 class STATUS(Enum):
