@@ -4,7 +4,7 @@ import re
 from discord.ext import tasks
 from dotenv import load_dotenv
 from enum import Enum
-from Hpoi_scraping import fetchCards, hpoiCard, STATUS
+from hpoi_scraping import fetchCards, hpoiCard, STATUS
 
 load_dotenv()
 token = os.getenv("TOKEN")
@@ -19,6 +19,7 @@ bot = discord.Client(intents=intents)
 # python3 example_bot.py to run bot
 @bot.event
 async def on_ready():
+    # channel = bot.get_channel(channel_id)
     print(f'We have logged in as {bot.user}')
 
 @bot.event
@@ -31,11 +32,11 @@ async def on_message(message):
 
     # Start/Stop fetching updates
     if ("hpoi trace on" == message.content.lower() or "hpoi trace on" in message.content.lower()):
-        channel = bot.get_channel(channel_id)
+        # channel = bot.get_channel(channel_id)
         # await channel.send('Start spying on Hpoi <:miku_omega:1146239251596460072>')
         pollSite.start()
     if ("hpoi eepy" == message.content.lower() or "hpoi eepy" in message.content.lower()):
-        channel = bot.get_channel(channel_id)
+        # channel = bot.get_channel(channel_id)
         # await channel.send('No longer spying on Hpoi <:cat_cry:1146240394724655235>')
         pollSite.stop()
 
@@ -43,10 +44,10 @@ async def on_message(message):
 async def pollSite():
     try:
         channel = bot.get_channel(channel_id)
-        cards = fetchCards()
+        # TODO: Make async and await instead
+        cards = await fetchCards()
         embeds = map(card_to_embed,cards)
     except Exception as e: 
-        # await channel.send('Found new update but I cannot get them <:cat_cry:1146240394724655235>')
         print(e)
     else:
         for embed in embeds:
@@ -63,7 +64,8 @@ class YOUR_OWN_G_DANG_COLOR_MAP(Enum):
 
 STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
     STATUS.NEW_ANNOUNCEMENT: YOUR_OWN_G_DANG_COLOR_MAP.purple,
-    STATUS.UPDATE: YOUR_OWN_G_DANG_COLOR_MAP.blue,
+    STATUS.IMG_UPDATE: YOUR_OWN_G_DANG_COLOR_MAP.blue,
+    STATUS.INFO_UPDATE: YOUR_OWN_G_DANG_COLOR_MAP.blue,
     STATUS.PO_OPENED: YOUR_OWN_G_DANG_COLOR_MAP.green,
     STATUS.RELEASE_DATE: YOUR_OWN_G_DANG_COLOR_MAP.gold,
     STATUS.DELAYED: YOUR_OWN_G_DANG_COLOR_MAP.red,
@@ -72,14 +74,14 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 
 def card_to_embed(card: hpoiCard):
    embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
-   embed.add_field(name = card.name, value = '',inline = False)
-   embed.add_field(name = "Origin", value = re.sub(r"[\n\t\s]*", "", card.origin), inline = True)
-   embed.add_field(name = "Character", value = re.sub(r"[\n\t\s]*", "", card.character), inline = True)
+   embed.add_field(name = card.name, value = '', inline = False)
+   embed.add_field(name = "Origin", value = card.origin, inline = True)
+   embed.add_field(name = "Character", value = card.character, inline = True)
    embed.add_field(name = "Manufacturer", value = card.manufacturer, inline = True)
    embed.add_field(name = "Illustrator", value = re.sub(r"[\n\t\s]*", "", card.illustrator), inline = True)
-   embed.add_field(name = "Release Date", value = re.sub(r"[\n\t\s]*", "", card.release_date), inline = True)
+   embed.add_field(name = "Release Date", value = card.release_date, inline = True)
    embed.add_field(name = "Price", value = card.price, inline = True)
-   embed.add_field(name = "Material", value = re.sub(r"[\n\t\s]*", "", card.material), inline = True)
+   embed.add_field(name = "Material", value = card.material, inline = True)
    embed.add_field(name = "Scale", value = card.scale, inline = True)
    embed.add_field(name = "Dimension", value = card.dimension, inline = True)
    embed.set_image(url = card.img_src)
