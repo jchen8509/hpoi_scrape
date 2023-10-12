@@ -1,13 +1,13 @@
 from enum import Enum
 from bs4 import BeautifulSoup, Tag, ResultSet
 from dataclasses import dataclass
-from hpoi_translation import FormatResponse
+from hpoi_translation import Process
 import aiohttp
 import asyncio
 
 URL = "https://www.hpoi.net"
 wait_time_seconds: float = 60 * 5
-BATCH_SIZE = 1
+BATCH_SIZE = 20
 
 
 class STATUS(Enum):
@@ -18,6 +18,7 @@ class STATUS(Enum):
     RELEASE_DATE = "Release Date"
     DELAYED = "Delayed"
     RE_RELEASE = "Re-Release"
+
 
 # Chinese translations
 TRANSLATIONS = {
@@ -91,42 +92,58 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
         name = getItem(inner_info, TRANSLATIONS.get("Name"))
         # what does it take in = type
         # what variable it takes in = variable name
-        translated_name = (name)
-        origin = getItem(inner_info, TRANSLATIONS.get("Origin"))
-        #translated_origin = translate_text(origin)
-        character = getItem(inner_info, TRANSLATIONS.get("Character"))
-        #translated_character = translate_text(character)
-        manufacturer = getItem(inner_info, TRANSLATIONS.get("Manufacturer"))
-        #translated_manufacturer = translate_text(manufacturer)
-        illustrator = getItem(inner_info, TRANSLATIONS.get("Illustrator"))
-        #translated_illustrator = translate_text(illustrator)
-        release_date = getItem(inner_info, TRANSLATIONS.get("Release Date"))
-        #translated_release_date = translate_text(release_date)
-        price = getItem(inner_info, TRANSLATIONS.get("Price"))
-        #translated_price = translate_text(price)
-        material = getItem(inner_info, TRANSLATIONS.get("Material"))
-        #translated_material = translate_text(material)
-        Scale = getItem(inner_info, TRANSLATIONS.get("Scale"))
-        #translated_scale = translate_text(scale)
-        dimension = getItem(inner_info, TRANSLATIONS.get("Dimension"))
-        #translated_dimension = translate_text(dimension)
 
+        origin = getItem(inner_info, TRANSLATIONS.get("Origin"))
+        character = getItem(inner_info, TRANSLATIONS.get("Character"))
+        manufacturer = getItem(inner_info, TRANSLATIONS.get("Manufacturer"))
+        illustrator = getItem(inner_info, TRANSLATIONS.get("Illustrator"))
+        release_date = getItem(inner_info, TRANSLATIONS.get("Release Date"))
+        price = getItem(inner_info, TRANSLATIONS.get("Price"))
+        material = getItem(inner_info, TRANSLATIONS.get("Material"))
+        scale = getItem(inner_info, TRANSLATIONS.get("Scale"))
+        dimension = getItem(inner_info, TRANSLATIONS.get("Dimension"))
+        [
+            translatedName,
+            translatedOrigin,
+            translatedCharacter,
+            translatedManufacturer,
+            translatedIllustrator,
+            translatedReleaseDate,
+            translatedPrice,
+            translatedMaterial,
+            translatedScale,
+            translatedDimension,
+        ] = await Process(
+            session,
+            sourceTexts=[
+                name,
+                origin,
+                character,
+                manufacturer,
+                illustrator,
+                release_date,
+                price,
+                material,
+                scale,
+                dimension,
+            ],
+        )
 
         return hpoiCard(
             title,
             status,
             link,
             img_src,
-            translated_name,
-            #translated_origin,
-            #translated_character,
-            #translated_manufacturer,
-            #translated_illustrator,
-            #translated_release_date,
-            #translated_price,
-            #translated_material,
-            #translated_scale,
-            #translated_dimension,
+            translatedName,
+            translatedOrigin,
+            translatedCharacter,
+            translatedManufacturer,
+            translatedIllustrator,
+            translatedReleaseDate,
+            translatedPrice,
+            translatedMaterial,
+            translatedScale,
+            translatedDimension,
         )
 
 
@@ -141,9 +158,9 @@ def getItem(tag: Tag, infoList_name: str):
 
 titleCache: list[str] = []
 
+
 async def fetchCards() -> list[hpoiCard]:
     print("Loading page...")
-    # TODO: Update to async function and use aiohttp instead
     async with aiohttp.ClientSession() as session:
         res = await session.get(URL)
 
@@ -154,13 +171,14 @@ async def fetchCards() -> list[hpoiCard]:
 
         print("Page loaded!")
         soup = BeautifulSoup(text, "html.parser")
-        tags: ResultSet[Tag] = soup.find("div", class_="hpoi-conter-ltsifrato").find_all(
-            "div", class_="hpoi-conter-left"
-        )
+        tags: ResultSet[Tag] = soup.find(
+            "div", class_="hpoi-conter-ltsifrato"
+        ).find_all("div", class_="hpoi-conter-left")
         tags = tags[:BATCH_SIZE]
 
         titles = map(
-            lambda tag: tag.find("div", class_="right-leioan").find_all("div")[4].text, tags
+            lambda tag: tag.find("div", class_="right-leioan").find_all("div")[4].text,
+            tags,
         )
         tags_and_titles = list(zip(tags, titles))
 
@@ -176,18 +194,18 @@ async def fetchCards() -> list[hpoiCard]:
         cardTasks = []
         for tag, title in tags_and_titles:
             # Code to grab card data; make async tag_to_card
-            cardTasks.insert(0,tag_to_card(tag, session))
-            
-            titleCache.insert(0,title)
+            cardTasks.insert(0, tag_to_card(tag, session))
+
+            titleCache.insert(0, title)
             # Remove stale entries from cache
-            if(len(titleCache) > BATCH_SIZE):
+            if len(titleCache) > BATCH_SIZE:
                 titleCache.pop(-1)
         # TODO: call gather here
         cards = await asyncio.gather(*cardTasks)
     return cards
 
-if __name__ == "__main__":
-     # Start the asyncio program
-     # programming languages list
-    asyncio.run(fetchCards())
 
+if __name__ == "__main__":
+    # Start the asyncio program
+    # programming languages list
+    asyncio.run(fetchCards())

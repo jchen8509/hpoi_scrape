@@ -19,7 +19,7 @@ bot = discord.Client(intents=intents)
 # python3 example_bot.py to run bot
 @bot.event
 async def on_ready():
-    channel = bot.get_channel(channel_id)
+    # channel = bot.get_channel(channel_id)
     print(f'We have logged in as {bot.user}')
 
 @bot.event
@@ -74,14 +74,14 @@ STATUS_TO_COLOR: dict[STATUS, YOUR_OWN_G_DANG_COLOR_MAP] = {
 
 def card_to_embed(card: hpoiCard):
    embed = discord.Embed(title = card.status.value, url = card.link, color = STATUS_TO_COLOR.get(card.status).value)
-   embed.add_field(name = card.name, value = '',inline = False)
-   embed.add_field(name = "Origin", value = re.sub(r"[\n\t\s]*", "", card.origin), inline = True)
-   embed.add_field(name = "Character", value = re.sub(r"[\n\t\s]*", "", card.character), inline = True)
+   embed.add_field(name = card.name, value = '', inline = False)
+   embed.add_field(name = "Origin", value = card.origin, inline = True)
+   embed.add_field(name = "Character", value = card.character, inline = True)
    embed.add_field(name = "Manufacturer", value = card.manufacturer, inline = True)
    embed.add_field(name = "Illustrator", value = re.sub(r"[\n\t\s]*", "", card.illustrator), inline = True)
    embed.add_field(name = "Release Date", value = card.release_date, inline = True)
    embed.add_field(name = "Price", value = card.price, inline = True)
-   embed.add_field(name = "Material", value = re.sub(r"[\n\t\s]*", "", card.material), inline = True)
+   embed.add_field(name = "Material", value = card.material, inline = True)
    embed.add_field(name = "Scale", value = card.scale, inline = True)
    embed.add_field(name = "Dimension", value = card.dimension, inline = True)
    embed.set_image(url = card.img_src)
