@@ -3,6 +3,7 @@ import aiohttp
 from dotenv import load_dotenv
 import json
 import os
+from manual_translation import format_setter, manu_translation
 
 load_dotenv()
 apiKey = str(os.getenv("API_KEY"))

@@ -8,7 +8,7 @@ from hpoi_translation import Process
 
 URL = "https://www.hpoi.net"
 wait_time_seconds: float = 60 * 5
-BATCH_SIZE = 2
+BATCH_SIZE = 20
 
 
 class STATUS(Enum):
@@ -129,7 +129,6 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
                 dimension,
             ],
         )
-        
         return hpoiCard(
             title,
             status,
