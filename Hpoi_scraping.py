@@ -2,14 +2,27 @@ import aiohttp
 import asyncio
 from bs4 import BeautifulSoup, Tag, ResultSet
 from dataclasses import dataclass
+from dotenv import load_dotenv
 from enum import Enum
 from hpoi_translation import Process
+import os
+import requests
 
+load_dotenv()
+username = os.getenv("USERNAME")
+password = os.getenv("PASSWORD")
 
-URL = "https://www.hpoi.net"
+login_link = "https://www.hpoi.net/user/login"
+login_request = "https://www.hpoi.net/user/login/submit"
+URL = "https://www.hpoi.net/"
 wait_time_seconds: float = 60 * 5
 BATCH_SIZE = 20
 
+cookies = {
+    'homeView': 'info',
+    'allOrder': 'add',
+    'utoken': os.getenv('UTOKEN') if(os.getenv('NSFW') == 1) else '',
+}
 
 class STATUS(Enum):
     NEW_ANNOUNCEMENT = "New Announcement"
@@ -36,14 +49,12 @@ TRANSLATIONS = {
     # --OUTER PAGE--
     "制作决定": STATUS.NEW_ANNOUNCEMENT,
     "官图更新": STATUS.IMG_UPDATE,
-    "": STATUS.INFO_UPDATE,
+    "情报更新": STATUS.INFO_UPDATE,
     "预定时间": STATUS.PO_OPENED,
     "出荷时间": STATUS.RELEASE_DATE,
     "出荷延期": STATUS.DELAYED,
     "再版确定": STATUS.RE_RELEASE,
 }
-# number of cards to poll at once
-
 
 # TODO: add consts for selectors
 @dataclass
@@ -96,6 +107,7 @@ async def tag_to_card(tag: Tag, session) -> hpoiCard:
 
         origin = getItem(inner_info, TRANSLATIONS.get("Origin"))
         character = getItem(inner_info, TRANSLATIONS.get("Character"))
+
         manufacturer = getItem(inner_info, TRANSLATIONS.get("Manufacturer"))
         illustrator = getItem(inner_info, TRANSLATIONS.get("Illustrator"))
         release_date = getItem(inner_info, TRANSLATIONS.get("Release Date"))
@@ -160,9 +172,10 @@ titleCache: list[str] = []
 
 
 async def fetchCards() -> list[hpoiCard]:
-    print("Loading page...")
     async with aiohttp.ClientSession() as session:
-        res = await session.get(URL)
+        # if(!cookies.get('utoken'))
+        #     login
+        res = await session.get(URL,cookies=cookies)
 
         text = await res.read()
 
@@ -171,9 +184,11 @@ async def fetchCards() -> list[hpoiCard]:
 
         print("Page loaded!")
         soup = BeautifulSoup(text, "html.parser")
+
         tags: ResultSet[Tag] = soup.find(
             "div", class_="hpoi-conter-ltsifrato"
         ).find_all("div", class_="hpoi-conter-left")
+
         tags = tags[:BATCH_SIZE]
 
         titles = map(
@@ -190,7 +205,6 @@ async def fetchCards() -> list[hpoiCard]:
             return []
         print("Found " + str(len(tags_and_titles)) + " new cards!")
 
-        # TODO: convert to list of tasks
         cardTasks = []
         for tag, title in tags_and_titles:
             # Code to grab card data; make async tag_to_card
@@ -200,9 +214,22 @@ async def fetchCards() -> list[hpoiCard]:
             # Remove stale entries from cache
             # if len(titleCache) > BATCH_SIZE:
                 # titleCache.pop(-1)
-        # TODO: call gather here
         cards = await asyncio.gather(*cardTasks)
     return cards
+
+def login():
+    # TODO convert to aiohttp
+    with requests.Session() as s:
+
+        payload = {}
+        payload['email'] = username
+        payload['password'] = password
+        payload['MIME Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
+
+        s.post(login_request,data=payload)
+
+        token = s.cookies.get('utoken')
+        print(token)
 
 
 if __name__ == "__main__":

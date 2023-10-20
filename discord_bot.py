@@ -44,7 +44,8 @@ async def on_message(message):
 async def pollSite():
     try:
         channel = bot.get_channel(channel_id)
-        # TODO: Make async and await instead
+        # channel_ids = [1,2,3,4]
+        # channels = map(bot.get_channel,channel_ids)
         cards = await fetchCards()
         embeds = map(card_to_embed,cards)
     except Exception as e: 
